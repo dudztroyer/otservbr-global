@@ -2908,7 +2908,7 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("MonsterType", "onSay", LuaScriptInterface::luaMonsterTypeEventOnCallback);
 
 	registerMethod("MonsterType", "getSummonList", LuaScriptInterface::luaMonsterTypeGetSummonList);
-	registerMethod("MonsterType", "maxSummons", LuaScriptInterface::luaMonsterTypeMaxSummons);
+	registerMethod("MonsterType", "getMaxSummons", LuaScriptInterface::luaMonsterTypeGetMaxSummons);
 
 	registerMethod("MonsterType", "armor", LuaScriptInterface::luaMonsterTypeArmor);
 	registerMethod("MonsterType", "defense", LuaScriptInterface::luaMonsterTypeDefense);
