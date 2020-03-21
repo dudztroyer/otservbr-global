@@ -2908,8 +2908,6 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("MonsterType", "onSay", LuaScriptInterface::luaMonsterTypeEventOnCallback);
 
 	registerMethod("MonsterType", "getSummonList", LuaScriptInterface::luaMonsterTypeGetSummonList);
-	registerMethod("MonsterType", "addSummon", LuaScriptInterface::luaMonsterTypeAddSummon);
-
 	registerMethod("MonsterType", "maxSummons", LuaScriptInterface::luaMonsterTypeMaxSummons);
 
 	registerMethod("MonsterType", "armor", LuaScriptInterface::luaMonsterTypeArmor);
@@ -8123,6 +8121,19 @@ int LuaScriptInterface::luaCreatureTeleportTo(lua_State* L)
 	}
 
 	const Position oldPosition = creature->getPosition();
+	Tile* toTile = g_game.map.getTile(position);
+	HouseTile* houseTile = dynamic_cast<HouseTile*>(toTile);
+	if (toTile && !houseTile) {
+		for (Creature* summon : creature->getSummons()) {
+			if (summon->getMonster()->isPet()) {
+				if (g_game.internalTeleport(summon, position, pushMovement) != RETURNVALUE_NOERROR) {
+					pushBoolean(L, false);
+					return 1;
+				}
+			}
+		}
+	}
+
 	if (g_game.internalTeleport(creature, position, pushMovement) != RETURNVALUE_NOERROR) {
 		pushBoolean(L, false);
 		return 1;
@@ -14318,23 +14329,6 @@ int LuaScriptInterface::luaMonsterTypeGetSummonList(lua_State* L)
 		setField(L, "speed", summonBlock.speed);
 		setField(L, "chance", summonBlock.chance);
 		lua_rawseti(L, -2, ++index);
-	}
-	return 1;
-}
-
-int LuaScriptInterface::luaMonsterTypeAddSummon(lua_State* L)
-{
-	// monsterType:addSummon(name, interval, chance)
-	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
-	if (monsterType) {
-		summonBlock_t summon;
-		summon.name = getString(L, 2);
-		summon.chance = getNumber<int32_t>(L, 3);
-		summon.speed = getNumber<int32_t>(L, 4);
-		monsterType->info.summons.push_back(summon);
-		pushBoolean(L, true);
-	} else {
-		lua_pushnil(L);
 	}
 	return 1;
 }
