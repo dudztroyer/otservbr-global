@@ -13651,15 +13651,10 @@ int LuaScriptInterface::luaMonsterTypeIsConvinceable(lua_State* L)
 
 int LuaScriptInterface::luaMonsterTypeIsSummonable(lua_State* L)
 {
-	// get: monsterType:isSummonable() set: monsterType:isSummonable(bool)
+	// monsterType:isSummonable()
 	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
 	if (monsterType) {
-		if (lua_gettop(L) == 1) {
-			pushBoolean(L, monsterType->info.isSummonable);
-		} else {
-			monsterType->info.isSummonable = getBoolean(L, 2);
-			pushBoolean(L, true);
-		}
+		pushBoolean(L, monsterType->info.isSummonable);
 	} else {
 		lua_pushnil(L);
 	}
@@ -14333,17 +14328,12 @@ int LuaScriptInterface::luaMonsterTypeGetSummonList(lua_State* L)
 	return 1;
 }
 
-int LuaScriptInterface::luaMonsterTypeMaxSummons(lua_State* L)
+int LuaScriptInterface::luaMonsterTypeGetMaxSummons(lua_State* L)
 {
-	// get: monsterType:maxSummons() set: monsterType:maxSummons(ammount)
+	// monsterType:getMaxSummons()
 	MonsterType* monsterType = getUserdata<MonsterType>(L, 1);
 	if (monsterType) {
-		if (lua_gettop(L) == 1) {
-			lua_pushnumber(L, monsterType->info.maxSummons);
-		} else {
-			monsterType->info.maxSummons = getNumber<uint32_t>(L, 2);
-			pushBoolean(L, true);
-		}
+		lua_pushnumber(L, monsterType->info.maxSummons);
 	} else {
 		lua_pushnil(L);
 	}

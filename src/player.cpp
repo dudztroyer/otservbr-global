@@ -712,13 +712,7 @@ bool Player::canWalkthrough(const Creature* creature) const
 		return true;
 	}
 
-	const Player* player = creature->getPlayer();
-	const Monster* monster = creature->getMonster();
-
-	if (monster) {
-		if (!monster->isPet()) {
-			return false;
-		}
+	if (creature->getMonster() && creature->getMonster()->isPet() && creature->getMaster() == this) {
 		return true;
 	}
 
@@ -758,11 +752,7 @@ bool Player::canWalkthroughEx(const Creature* creature) const
 		return true;
 	}
 
-	const Monster* monster = creature->getMonster();
-	if (monster) {
-		if (!monster->isPet()) {
-			return false;
-		}
+	if (creature->getMonster() && creature->getMonster()->isPet() && creature->getMaster() == this) {
 		return true;
 	}
 
