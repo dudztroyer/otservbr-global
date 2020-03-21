@@ -1351,8 +1351,7 @@ class LuaScriptInterface
 		static int luaMonsterTypeEventType(lua_State* L);
 
 		static int luaMonsterTypeGetSummonList(lua_State* L);
-
-		static int luaMonsterTypeMaxSummons(lua_State* L);
+		static int luaMonsterTypeGetMaxSummons(lua_State* L);
 
 		static int luaMonsterTypeArmor(lua_State* L);
 		static int luaMonsterTypeDefense(lua_State* L);
