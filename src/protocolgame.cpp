@@ -1369,7 +1369,7 @@ void ProtocolGame::sendCreatureType(uint32_t creatureId, uint8_t creatureType)
 {
 	NetworkMessage msg;
 	msg.addByte(0x95);
-	msg.add<uint32_t>(creature->getID());
+	msg.add<uint32_t>(creatureId);
 	msg.addByte(creatureType);
 
 	if (player->getOperatingSystem() == CLIENTOS_WINDOWS && player->getProtocolVersion() >= 1120) {
