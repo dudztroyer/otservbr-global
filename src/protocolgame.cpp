@@ -1365,7 +1365,7 @@ void ProtocolGame::sendCreatureSkull(const Creature* creature)
 	writeToOutputBuffer(msg);
 }
 
-void ProtocolGame::sendCreatureType(uint32_t creatureId, uint8_t creatureType)
+void ProtocolGame::sendCreatureType(const Creature* creature, uint32_t creatureId, uint8_t creatureType)
 {
 	NetworkMessage msg;
 	msg.addByte(0x95);
@@ -1377,7 +1377,7 @@ void ProtocolGame::sendCreatureType(uint32_t creatureId, uint8_t creatureType)
 	}
 
 	if (creatureType == CREATURETYPE_SUMMON_OWN && player->getProtocolVersion() >= 1120) {
-		master = creatureId->getMaster();
+		const Creature* master = creature->getMaster();
 		if (master) {
 			msg.add<uint32_t>(master->getID());
 		}
