@@ -1376,7 +1376,7 @@ void ProtocolGame::sendCreatureType(uint32_t creatureId, uint8_t creatureType)
 		msg.addByte(creatureType); // type or any byte idk
 	}
 
-	if (creatureType == CREATURETYPE_SUMMONPLAYER && player->getProtocolVersion() >= 1120) {
+	if (creatureType == CREATURETYPE_SUMMON_OWN && player->getProtocolVersion() >= 1120) {
 		const Creature* master = creature->getMaster();
 		if (master) {
 			msg.add<uint32_t>(master->getID());
@@ -3407,7 +3407,7 @@ void ProtocolGame::AddCreature(NetworkMessage& msg, const Creature* creature, bo
 		msg.addByte(creatureType);
 
 		if (player->getProtocolVersion() >= 1120) {
-			if (creatureType == CREATURETYPE_SUMMONPLAYER) {
+			if (creatureType == CREATURETYPE_SUMMON_OWN) {
 				const Creature* master = creature->getMaster();
 				if (master) {
 					msg.add<uint32_t>(master->getID());
@@ -3452,7 +3452,7 @@ void ProtocolGame::AddCreature(NetworkMessage& msg, const Creature* creature, bo
 			if (master) {
 				const Player* masterPlayer = master->getPlayer();
 				if (masterPlayer) {
-					creatureType = CREATURETYPE_SUMMONPLAYER;
+					creatureType = CREATURETYPE_SUMMON_OWN;
 				}
 			}
 		}
@@ -3461,7 +3461,7 @@ void ProtocolGame::AddCreature(NetworkMessage& msg, const Creature* creature, bo
 	msg.addByte(creatureType); // Type (for summons)
 
 	if (player->getProtocolVersion() >= 1120) {
-		if (creatureType == CREATURETYPE_SUMMONPLAYER) {
+		if (creatureType == CREATURETYPE_SUMMON_OWN) {
 			const Creature* master = creature->getMaster();
 			if (master) {
 				msg.add<uint32_t>(master->getID());
