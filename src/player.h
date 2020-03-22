@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OT_SRC_PLAYER_H_
-#define OT_SRC_PLAYER_H_
+#ifndef FS_PLAYER_H_4083D3D3A05B4EDE891B31BB720CD06F
+#define FS_PLAYER_H_4083D3D3A05B4EDE891B31BB720CD06F
 
 #include "creature.h"
 #include "container.h"
@@ -911,9 +911,9 @@ class Player final : public Creature, public Cylinder
 				client->sendCreatureShield(creature);
 			}
 		}
-		void sendCreatureType(const Creature* creature, uint8_t creatureType) {
+		void sendCreatureType(uint32_t creatureId, uint8_t creatureType) {
 			if (client) {
-				client->sendCreatureType(creature, creatureType);
+				client->sendCreatureType(creatureId, creatureType);
 			}
 		}
 		void sendCreatureHelpers(uint32_t creatureId, uint16_t helpers) {

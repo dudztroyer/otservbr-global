@@ -1365,7 +1365,7 @@ void ProtocolGame::sendCreatureSkull(const Creature* creature)
 	writeToOutputBuffer(msg);
 }
 
-void ProtocolGame::sendCreatureType(const Creature* creature, uint8_t creatureType)
+void ProtocolGame::sendCreatureType(uint32_t creatureId, uint8_t creatureType)
 {
 	NetworkMessage msg;
 	msg.addByte(0x95);
@@ -3419,7 +3419,7 @@ void ProtocolGame::AddCreature(NetworkMessage& msg, const Creature* creature, bo
 	}
 
 	if (creature->isHealthHidden()) {
-		msg.addByte(0x00);
+		msg.addByte(0x00); // INSPECTION_STATE
 	} else {
 		msg.addByte(std::ceil((static_cast<double>(creature->getHealth()) / std::max<int32_t>(creature->getMaxHealth(), 1)) * 100));
 	}

@@ -1517,7 +1517,6 @@ void LuaScriptInterface::registerFunctions()
 	registerEnum(CREATURETYPE_PLAYER)
 	registerEnum(CREATURETYPE_MONSTER)
 	registerEnum(CREATURETYPE_NPC)
-	registerEnum(CREATURETYPE_SUMMONPLAYER)
 	registerEnum(CREATURETYPE_SUMMON_OWN)
 	registerEnum(CREATURETYPE_SUMMON_OTHERS)
 
@@ -2424,6 +2423,9 @@ void LuaScriptInterface::registerFunctions()
 
 	registerMethod("Player", "getMagicLevel", LuaScriptInterface::luaPlayerGetMagicLevel);
 	registerMethod("Player", "getBaseMagicLevel", LuaScriptInterface::luaPlayerGetBaseMagicLevel);
+	registerMethod("Player", "getMana", LuaScriptInterface::luaPlayerGetMana);
+	registerMethod("Player", "addMana", LuaScriptInterface::luaPlayerAddMana);
+	registerMethod("Player", "getMaxMana", LuaScriptInterface::luaPlayerGetMaxMana);
 	registerMethod("Player", "setMaxMana", LuaScriptInterface::luaPlayerSetMaxMana);
 	registerMethod("Player", "getManaSpent", LuaScriptInterface::luaPlayerGetManaSpent);
 	registerMethod("Player", "addManaSpent", LuaScriptInterface::luaPlayerAddManaSpent);
@@ -4462,7 +4464,7 @@ int LuaScriptInterface::luaGameGetSpectators(lua_State* L)
 	int32_t minRangeY = getNumber<int32_t>(L, 6, 0);
 	int32_t maxRangeY = getNumber<int32_t>(L, 7, 0);
 
-	SpectatorHashSet spectators;
+	SpectatorVec spectators;
 	g_game.map.getSpectators(spectators, position, multifloor, onlyPlayers, minRangeX, maxRangeX, minRangeY, maxRangeY);
 
 	lua_createtable(L, spectators.size(), 0);
@@ -5087,7 +5089,7 @@ int LuaScriptInterface::luaPositionIsSightClear(lua_State* L)
 int LuaScriptInterface::luaPositionSendMagicEffect(lua_State* L)
 {
 	// position:sendMagicEffect(magicEffect[, player = nullptr])
-	SpectatorHashSet spectators;
+	SpectatorVec spectators;
 	if (lua_gettop(L) >= 3) {
 		Player* player = getPlayer(L, 3);
 		if (player) {
@@ -5110,7 +5112,7 @@ int LuaScriptInterface::luaPositionSendMagicEffect(lua_State* L)
 int LuaScriptInterface::luaPositionSendDistanceEffect(lua_State* L)
 {
 	// position:sendDistanceEffect(positionEx, distanceEffect[, player = nullptr])
-	SpectatorHashSet spectators;
+	SpectatorVec spectators;
 	if (lua_gettop(L) >= 4) {
 		Player* player = getPlayer(L, 4);
 		if (player) {
@@ -8175,7 +8177,7 @@ int LuaScriptInterface::luaCreatureSay(lua_State* L)
 		return 1;
 	}
 
-	SpectatorHashSet spectators;
+	SpectatorVec spectators;
 	if (target) {
 		spectators.insert(target);
 	}
@@ -8804,6 +8806,53 @@ int LuaScriptInterface::luaPlayerGetBaseMagicLevel(lua_State* L)
 	Player* player = getUserdata<Player>(L, 1);
 	if (player) {
 		lua_pushnumber(L, player->getBaseMagicLevel());
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerGetMana(lua_State* L)
+{
+	// player:getMana()
+	const Player* player = getUserdata<const Player>(L, 1);
+	if (player) {
+		lua_pushnumber(L, player->getMana());
+	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerAddMana(lua_State* L)
+{
+	// player:addMana(manaChange[, animationOnLoss = false])
+	Player* player = getUserdata<Player>(L, 1);
+	if (!player) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	int32_t manaChange = getNumber<int32_t>(L, 2);
+	bool animationOnLoss = getBoolean(L, 3, false);
+	if (!animationOnLoss && manaChange < 0) {
+		player->changeMana(manaChange);
+	} else {
+		CombatDamage damage;
+		damage.primary.value = manaChange;
+		damage.origin = ORIGIN_NONE;
+		g_game.combatChangeMana(nullptr, player, damage);
+	}
+	pushBoolean(L, true);
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerGetMaxMana(lua_State* L)
+{
+	// player:getMaxMana()
+	const Player* player = getUserdata<const Player>(L, 1);
+	if (player) {
+		lua_pushnumber(L, player->getMaxMana());
 	} else {
 		lua_pushnil(L);
 	}
@@ -10893,7 +10942,7 @@ int LuaScriptInterface::luaPlayerSetGhostMode(lua_State* L)
 	Tile* tile = player->getTile();
 	const Position& position = player->getPosition();
 
-	SpectatorHashSet spectators;
+	SpectatorVec spectators;
 	g_game.map.getSpectators(spectators, position, true, true);
 	for (Creature* spectator : spectators) {
 		Player* tmpPlayer = spectator->getPlayer();

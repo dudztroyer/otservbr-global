@@ -145,7 +145,7 @@ class Monster final : public Creature
 
 		void drainHealth(Creature* attacker, int32_t damage) final;
 		void changeHealth(int32_t healthChange, bool sendHealthChange = true) final;
-		void onCreatureWalk();
+		void onWalk();
 		bool getNextStep(Direction& direction, uint32_t& flags) final;
 		void onFollowCreatureComplete(const Creature* creature) final;
 
@@ -172,13 +172,16 @@ class Monster final : public Creature
 		}
 
 		bool isTarget(const Creature* creature) const;
-		bool isFleeing() const {
-			return !isSummon() && getHealth() <= mType->info.runAwayHealth && targetExetaCooldown <= 0;
+				bool isFleeing() const {
+			return !isSummon() && getHealth() <= mType->info.runAwayHealth && challengeFocusDuration <= 0;
 		}
 
 		bool getDistanceStep(const Position& targetPos, Direction& direction, bool flee = false);
 		bool isTargetNearby() const {
 			return stepDuration >= 1;
+		}
+		bool isIgnoringFieldDamage() const {
+			return ignoreFieldDamage;
 		}
 		bool israndomStepping() const {
 			return randomStepping;
@@ -214,7 +217,7 @@ class Monster final : public Creature
 		int32_t minCombatValue = 0;
 		int32_t maxCombatValue = 0;
 		int32_t targetChangeCooldown = 0;
-		int32_t targetExetaCooldown = 0;
+		int32_t challengeFocusDuration = 0;
 		int32_t stepDuration = 0;
 
 		Position masterPos;

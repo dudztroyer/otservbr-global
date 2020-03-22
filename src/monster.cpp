@@ -370,7 +370,7 @@ void Monster::updateTargetList()
 		}
 	}
 
-	SpectatorHashSet spectators;
+	SpectatorVec spectators;
 	g_game.map.getSpectators(spectators, position, true);
 	spectators.erase(this);
 	for (Creature* spectator : spectators) {
@@ -455,7 +455,7 @@ bool Monster::isOpponent(const Creature* creature) const
 		}
 	} else {
 		if ((creature->getPlayer() && !creature->getPlayer()->hasFlag(PlayerFlag_IgnoredByMonsters)) ||
-				(creature->getMaster() && creature->getMaster()->getPlayer())) {
+		        (creature->getMaster() && creature->getMaster()->getPlayer())) {
 			return true;
 		}
 	}
@@ -631,10 +631,6 @@ bool Monster::selectTarget(Creature* creature)
 		return false;
 	}
 
-	if (isPassive() && !hasBeenAttacked(creature->getID())) {
-		return false;
-	}
-
 	auto it = std::find(targetList.begin(), targetList.end(), creature);
 	if (it == targetList.end()) {
 		//Target not found in our target list.
@@ -725,10 +721,6 @@ void Monster::onThink(uint32_t interval)
 		if (scriptInterface->callFunction(2)) {
 			return;
 		}
-	}
-
-	if (!mType->canSpawn(position)) {
-		g_game.removeCreature(this);
 	}
 
 	if (!isInSpawnRange(position)) {
@@ -886,11 +878,11 @@ void Monster::onThinkTarget(uint32_t interval)
 		if (mType->info.changeTargetSpeed != 0) {
 			bool canChangeTarget = true;
 
-			if (targetExetaCooldown > 0) {
-				targetExetaCooldown -= interval;
+			if (challengeFocusDuration > 0) {
+				challengeFocusDuration -= interval;
 
-				if (targetExetaCooldown <= 0) {
-					targetExetaCooldown = 0;
+				if (challengeFocusDuration <= 0) {
+					challengeFocusDuration = 0;
 				}
 			}
 
@@ -912,8 +904,8 @@ void Monster::onThinkTarget(uint32_t interval)
 					targetChangeTicks = 0;
 					targetChangeCooldown = mType->info.changeTargetSpeed;
 
-					if (targetExetaCooldown > 0) {
-						targetExetaCooldown = 0;
+					if (challengeFocusDuration > 0) {
+						challengeFocusDuration = 0;
 					}
 
 					if (mType->info.changeTargetChance >= uniform_random(1, 100)) {
@@ -1026,9 +1018,9 @@ void Monster::onThinkYell(uint32_t interval)
 	}
 }
 
-void Monster::onCreatureWalk()
+void Monster::onWalk()
 {
-	Creature::onCreatureWalk();
+	Creature::onWalk();
 }
 
 bool Monster::pushItem(Item* item)
@@ -1134,7 +1126,7 @@ void Monster::pushCreatures(Tile* tile)
 	}
 }
 
-bool Monster::getNextStep(Direction& nextDirection, uint32_t& flags)
+bool Monster::getNextStep(Direction& direction, uint32_t& flags)
 {
 	if (isIdle || getHealth() <= 0) {
 		//we dont have anyone watching might aswell stop walking
@@ -1147,11 +1139,11 @@ bool Monster::getNextStep(Direction& nextDirection, uint32_t& flags)
 		if (getTimeSinceLastMove() >= 1000) {
 			randomStepping = true;
 			//choose a random direction
-			result = getRandomStep(getPosition(), nextDirection);
+			result = getRandomStep(getPosition(), direction);
 		}
 	} else if ((isSummon() && isMasterInRange) || followCreature) {
 		randomStepping = false;
-		result = Creature::getNextStep(nextDirection, flags);
+		result = Creature::getNextStep(direction, flags);
 		if (result) {
 			flags |= FLAG_PATHFINDING;
 		} else {
@@ -1162,9 +1154,9 @@ bool Monster::getNextStep(Direction& nextDirection, uint32_t& flags)
 			//target dancing
 			if (attackedCreature && attackedCreature == followCreature) {
 				if (isFleeing()) {
-					result = getDanceStep(getPosition(), nextDirection, false, false);
+					result = getDanceStep(getPosition(), direction, false, false);
 				} else if (mType->info.staticAttackChance < static_cast<uint32_t>(uniform_random(1, 100))) {
-					result = getDanceStep(getPosition(), nextDirection);
+					result = getDanceStep(getPosition(), direction);
 				}
 			}
 		}
@@ -1172,14 +1164,14 @@ bool Monster::getNextStep(Direction& nextDirection, uint32_t& flags)
 
 	if (result && (canPushItems() || canPushCreatures())) {
 		const Position& pos = Spells::getCasterPosition(this, direction);
-		Tile* posTile = g_game.map.getTile(pos);
-		if (posTile) {
+		Tile* tile = g_game.map.getTile(pos);
+		if (tile) {
 			if (canPushItems()) {
-				Monster::pushItems(posTile);
+				Monster::pushItems(tile);
 			}
 
 			if (canPushCreatures()) {
-				Monster::pushCreatures(posTile);
+				Monster::pushCreatures(tile);
 			}
 		}
 	}
@@ -1978,7 +1970,7 @@ bool Monster::challengeCreature(Creature* creature)
 	bool result = selectTarget(creature);
 	if (result) {
 		targetChangeCooldown = 8000;
-		targetExetaCooldown = targetChangeCooldown;
+		challengeFocusDuration = targetChangeCooldown;
 		targetChangeTicks = 0;
 	}
 	return result;

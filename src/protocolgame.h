@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OT_SRC_PROTOCOLGAME_H_
-#define OT_SRC_PROTOCOLGAME_H_
+#ifndef FS_PROTOCOLGAME_H_FACA2A2D1A9348B78E8FD7E8003EBB87
+#define FS_PROTOCOLGAME_H_FACA2A2D1A9348B78E8FD7E8003EBB87
 
 #include "protocol.h"
 #include "chat.h"
@@ -229,7 +229,7 @@ class ProtocolGame final : public Protocol
 		void sendCreatureWalkthrough(const Creature* creature, bool walkthrough);
 		void sendCreatureShield(const Creature* creature);
 		void sendCreatureSkull(const Creature* creature);
-		void sendCreatureType(const Creature* creature, uint8_t creatureType);
+		void sendCreatureType(uint32_t creatureId, uint8_t creatureType);
 		void sendCreatureHelpers(uint32_t creatureId, uint16_t helpers);
 
 		void sendShop(Npc* npc, const ShopInfoList& itemList);

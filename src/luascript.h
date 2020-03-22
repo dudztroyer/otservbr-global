@@ -880,6 +880,9 @@ class LuaScriptInterface
 
 		static int luaPlayerGetMagicLevel(lua_State* L);
 		static int luaPlayerGetBaseMagicLevel(lua_State* L);
+		static int luaPlayerGetMana(lua_State* L);
+		static int luaPlayerAddMana(lua_State* L);
+		static int luaPlayerGetMaxMana(lua_State* L);
 		static int luaPlayerSetMaxMana(lua_State* L);
 		static int luaPlayerGetManaSpent(lua_State* L);
 		static int luaPlayerAddManaSpent(lua_State* L);
