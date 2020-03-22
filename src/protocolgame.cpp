@@ -1377,7 +1377,7 @@ void ProtocolGame::sendCreatureType(uint32_t creatureId, uint8_t creatureType)
 	}
 
 	if (creatureType == CREATURETYPE_SUMMON_OWN && player->getProtocolVersion() >= 1120) {
-		uint32_t master = creatureId->getMaster();
+		master = creatureId->getMaster();
 		if (master) {
 			msg.add<uint32_t>(master->getID());
 		}
